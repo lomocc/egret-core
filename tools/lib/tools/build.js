@@ -8,53 +8,66 @@ var libs = require("../core/normal_libs");
 var param = require("../core/params_analyze.js");
 var compiler = require("./compile.js")
 function run(dir, args, opts) {
+
+	var egretOutput = "egret.js";
+	
+
     var needCompileEngine = opts["-e"];
-
-    var currDir = libs.joinEgretDir(dir, args[0]);
-
-    var egret_file = path.join(currDir, "bin-debug/lib/egret_file_list.js");
+	var needCompileFile = opts["-f"];
+	var projectDir = path.join(dir, opts["-project"] || ".");
+	var mainApp = args[0] + ".ts";
+	var projectOutput = opts["-out"] || "output.js";
+	console.log(dir);
+	console.log(args);
+	console.log(opts);
+	console.log("projectDir=" + projectDir, "\nmainApp=" + mainApp, "\nprojectOutput=" + projectOutput,"\n");
+	
     var task = [];
     if (needCompileEngine) {
         task.push(
             function (callback) {
                 var runtime = param.getOption(opts, "--runtime", ["html5", "native"]);
-                compiler.generateEgretFileList(callback, egret_file, runtime);
+                compiler.generateEgretFileList(callback, runtime);
 
             },
             function (callback) {
                 compiler.compile(callback,
                     path.join(param.getEgretPath(), "src"),
-                    path.join(currDir, "bin-debug/lib"),
-                    egret_file
+                    path.join(projectDir, "bin-debug"),
+					egretOutput,
+                    egret_file_list
                 );
             },
-
             function (callback) {
                 compiler.exportHeader(callback,
                     path.join(param.getEgretPath(), "src"),
-                    path.join(currDir, "src", "egret.d.ts"),
-                    egret_file
+                    path.join(projectDir, "src", "egret.d.ts"),
+                    egret_file_list
                 );
-
             }
         );
     }
     else {
-        var exist = fs.existsSync(path.join(currDir,"bin-debug","lib"));
+        var exist = fs.existsSync(path.join(projectDir,"bin-debug", egretOutput));
         if (!exist){
             libs.exit(1102)
         }
     }
 
-    task.push(
-        function (callback) {
-            compiler.compile(callback,
-                path.join(currDir, "src"),
-                path.join(currDir, "bin-debug/src"),
-                path.join(currDir, "src/game_file_list.js")
-            );
-        }
-    )
+	if (needCompileFile)
+	{
+		task.push(
+			function (callback) {
+				compiler.compile(callback,
+					path.join(projectDir, "src"),
+					path.join(projectDir, "bin-debug"),
+					projectOutput,
+					[mainApp]
+				);
+			}
+		);
+	}
+    
 
     async.series(task, function (err) {
         libs.log("构建成功");
@@ -65,7 +78,17 @@ function run(dir, args, opts) {
 function help_title() {
     return "构建指定项目,编译指定项目的 TypeScript 文件\n";
 }
-
+function getFileList(file_list) {
+    if (fs.existsSync(file_list)) {
+        var js_content = fs.readFileSync(file_list, "utf-8");
+        eval(js_content);
+        var varname = path.basename(file_list).split(".js")[0];
+        return eval(varname);
+    }
+    else {
+        libs.exit(1301, file_list);
+    }
+}
 
 function help_example() {
     var result =  "\n";
