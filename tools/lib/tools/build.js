@@ -7,88 +7,112 @@ var async = require('../core/async');
 var libs = require("../core/normal_libs");
 var param = require("../core/params_analyze.js");
 var compiler = require("./compile.js")
+var exmlc = require("../exml/exmlc.js");
 function run(dir, args, opts) {
-
-	var egretOutput = "egret.js";
-	
-
     var needCompileEngine = opts["-e"];
-	var needCompileFile = opts["-f"];
-	var projectDir = path.join(dir, opts["-project"] || ".");
-	var mainApp = args[0] + ".ts";
-	var projectOutput = opts["-out"] || "output.js";
-	console.log(dir);
-	console.log(args);
-	console.log(opts);
-	console.log("projectDir=" + projectDir, "\nmainApp=" + mainApp, "\nprojectOutput=" + projectOutput,"\n");
-	
+    var keepGeneratedTypescript = opts["-k"];
+
+    var currDir = libs.joinEgretDir(dir, args[0]);
+
+    var egret_file = path.join(currDir, "bin-debug/lib/egret_file_list.js");
     var task = [];
+
+    var exmlList = [];
+    task.push(function(callback){
+        if(!keepGeneratedTypescript){
+            libs.addCallBackWhenExit(cleanEXMLList);
+        }
+        var source = path.join(currDir, "src");
+        exmlList = libs.loopFileSync(source, filter);
+        source += "/";
+        exmlList.forEach(function (item) {
+            exmlc.compile(item,source);
+        });
+
+        callback();
+
+        function filter(path) {
+            var index = path.lastIndexOf(".");
+            if(index==-1){
+                return false;
+            }
+            return path.substring(index).toLowerCase()==".exml";
+        }
+    })
+
+
     if (needCompileEngine) {
         task.push(
             function (callback) {
                 var runtime = param.getOption(opts, "--runtime", ["html5", "native"]);
-                compiler.generateEgretFileList(callback, runtime);
+                compiler.generateEgretFileList(callback, egret_file, runtime);
 
             },
             function (callback) {
                 compiler.compile(callback,
                     path.join(param.getEgretPath(), "src"),
-                    path.join(projectDir, "bin-debug"),
-					egretOutput,
-                    egret_file_list
+                    path.join(currDir, "bin-debug/lib"),
+                    egret_file
                 );
             },
+
             function (callback) {
                 compiler.exportHeader(callback,
                     path.join(param.getEgretPath(), "src"),
-                    path.join(projectDir, "src", "egret.d.ts"),
-                    egret_file_list
+                    path.join(currDir, "src", "egret.d.ts"),
+                    egret_file
                 );
+
             }
         );
     }
     else {
-        var exist = fs.existsSync(path.join(projectDir,"bin-debug", egretOutput));
+        var exist = fs.existsSync(path.join(currDir,"bin-debug","lib"));
         if (!exist){
             libs.exit(1102)
         }
     }
 
-	if (needCompileFile)
-	{
-		task.push(
-			function (callback) {
-				compiler.compile(callback,
-					path.join(projectDir, "src"),
-					path.join(projectDir, "bin-debug"),
-					projectOutput,
-					[mainApp]
-				);
-			}
-		);
-	}
-    
+    task.push(
+        function (callback) {
+            compiler.compile(callback,
+                path.join(currDir, "src"),
+                path.join(currDir, "bin-debug/src"),
+                path.join(currDir, "src/game_file_list.js")
+            );
+        }
+    )
+
 
     async.series(task, function (err) {
-        libs.log("构建成功");
+        if(!keepGeneratedTypescript) {
+            cleanEXMLList();
+        }
+        if (!err){
+            libs.log("构建成功");
+        }
+        else{
+            libs.exit(err);
+        }
     })
+
+    function cleanEXMLList(){
+        if(exmlList){
+            var source = path.join(currDir, "src");
+            exmlList.forEach(function (item) {
+                var tsPath = path.join(source,item);
+                tsPath = tsPath.substring(0,tsPath.length-5)+".ts";
+                libs.remove(tsPath);
+            });
+        }
+    }
 }
 
 
 function help_title() {
     return "构建指定项目,编译指定项目的 TypeScript 文件\n";
 }
-function getFileList(file_list) {
-    if (fs.existsSync(file_list)) {
-        var js_content = fs.readFileSync(file_list, "utf-8");
-        eval(js_content);
-        var varname = path.basename(file_list).split(".js")[0];
-        return eval(varname);
-    }
-    else {
-        libs.exit(1301, file_list);
-    }
-}
+
 
 function help_example() {
     var result =  "\n";

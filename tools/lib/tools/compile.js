@@ -36,26 +36,31 @@ function run(currentDir, args, opts) {
  * @param output 输出地址
  * @param file_list 文件名称，默认为source/src/game_file_list.js或 source/src/egret_file_list.js
  */
-function buildAllFile(callback, source, output, outputFile, sourceList) {
+function buildAllFile(callback, source, output, file_list) {
 
     async.waterfall([
         checkCompilerInstalled,
 
-        //cp所有非ts文件
+        //cp所有非ts/exml文件
         function (callback) {
-            var all_js_file = libs.loopFileSync(source, filter);
-            all_js_file.forEach(function (item) {
+            var all_file = libs.loopFileSync(source, filter);
+            all_file.forEach(function (item) {
                 libs.copy(path.join(source, item), path.join(output, item));
             })
             callback(null);
 
             function filter(path) {
-                return  path.indexOf(".ts") == -1;
+                var index = path.lastIndexOf(".");
+                if(index==-1){
+                    return true;
+                }
+                var ext = path.substring(index).toLowerCase();
+                return ext!=".ts"&&ext!=".exml";
             }
         },
 
         function (callback) {
-            //var sourceList = getFileList(file_list);
+            var sourceList = getFileList(file_list);
             sourceList = sourceList.map(function (item) {
                 return path.join(source, item).replace(".js", ".ts");
             }).filter(function (item) {
@@ -64,7 +69,7 @@ function buildAllFile(callback, source, output, outputFile, sourceList) {
                     return "\"" + item + "\"";
                 })
 
-            var cmd = "" + sourceList.join(" ") + " -t ES5 --sourcemap --out " + "\"" + output +"/"+ outputFile + "\"";
+            var cmd = "" + sourceList.join(" ") + " -t ES5 --outDir " + "\"" + output + "\"";
             fs.writeFileSync("tsc_config_temp.txt", cmd, "utf-8");
             var ts = cp_exec("tsc @tsc_config_temp.txt");
             ts.stderr.on("data", function (data) {
@@ -73,14 +78,14 @@ function buildAllFile(callback, source, output, outputFile, sourceList) {
 
 
             ts.on('exit', function (code) {
-                //fs.unlinkSync("tsc_config_temp.txt");
+                fs.unlinkSync("tsc_config_temp.txt");
 
                 if (code == 0) {
-                    libs.log("编译 " + sourceList + " 成功");
+                    libs.log("编译 " + file_list + " 成功");
                     callback(null, source);
                 }
                 else {
-                    libs.log(1303)
+                    callback(1303);
                 }
 
             });
@@ -89,11 +94,7 @@ function buildAllFile(callback, source, output, outputFile, sourceList) {
 
 
     ], function (err) {
-
-        if (err) {
-            libs.exit(err);
-        }
-        callback();
+        callback(err);
     })
 
 
@@ -126,24 +127,23 @@ function checkCompilerInstalled(callback) {
     );
 }
 
-function generateEgretFileList(callback, runtime) {
+function generateEgretFileList(callback, egret_file, runtime) {
     var file_list = libs.require("tools/lib/core/file_list.js");
     var required_file_list = file_list.core.concat(file_list[runtime]);
 
     var content = required_file_list.map(function (item) {
         return "\"" + item + "\""
     }).join(",\n")
-    content = "egret_file_list = [\n" + content + "\n]";
-	eval(content);
-    //libs.mkdir(path.dirname(egret_file));
-    //fs.writeFileSync(egret_file, content, "utf-8");
+    content = "var egret_file_list = [\n" + content + "\n]";
+    libs.mkdir(path.dirname(egret_file));
+    fs.writeFileSync(egret_file, content, "utf-8");
     callback();
 
 }
 
 
-function exportHeader(callback, source, output, list) {
-    //var list = getFileList(file_list);
+function exportHeader(callback, source, output, file_list) {
+    var list = getFileList(file_list);
     list = list.map(function (item) {
         return path.join(source, item).replace(".js", ".ts");
     }).filter(function (item) {
@@ -167,7 +167,7 @@ function exportHeader(callback, source, output, list) {
             }
         }
         else {
-            libs.exit(1303);
+            callback(1303)
         }
 
     });
