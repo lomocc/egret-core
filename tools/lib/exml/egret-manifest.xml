@@ -1,0 +1,53 @@
+<componentPackage>
+  <component id="ArrayCollection" super="EventDispatcher" default="source" package="egret.collections"/>
+  <component id="BasicLayout" super="LayoutBase" package="egret.layouts"/>
+  <component id="Button" super="ButtonBase" package="egret.components"/>
+  <component id="ButtonBase" super="SkinnableComponent" default="label" state="up,over,down,disabled" package="egret.components.supportClasses"/>
+  <component id="CheckBox" super="ToggleButtonBase" package="egret.components"/>
+  <component id="DataGroup" super="GroupBase" default="dataProvider" package="egret.components"/>
+  <component id="DropDownList" super="DropDownListBase" package="egret.components"/>
+  <component id="DropDownListBase" super="List" state="normal,open,disabled" package="egret.components.supportClasses"/>
+  <component id="Group" super="GroupBase" default="elementsContent" package="egret.components"/>
+  <component id="GroupBase" super="UIComponent" package="egret.components.supportClasses"/>
+  <component id="HSlider" super="SliderBase" package="egret.components"/>
+  <component id="HorizontalLayout" super="LayoutBase" package="egret.layouts"/>
+  <component id="ItemRenderer" super="ButtonBase" package="egret.components.supportClasses"/>
+  <component id="Label" super="TextBase" package="egret.components"/>
+  <component id="LayoutBase" super="EventDispatcher" package="egret.layouts.supportClasses"/>
+  <component id="List" super="ListBase" package="egret.components"/>
+  <component id="ListBase" super="SkinnableDataContainer" package="egret.components.supportClasses"/>
+  <component id="Matrix" super="Object" package="flash.geom"/>
+  <component id="ObjectCollection" super="EventDispatcher" default="source" package="egret.collections"/>
+  <component id="Panel" super="SkinnableContainer" package="egret.components"/>
+  <component id="Point" super="Object" package="flash.geom"/>
+  <component id="PopUpAnchor" super="UIComponent" default="popUp" package="egret.components"/>
+  <component id="ProgressBar" super="Range" package="egret.components"/>
+  <component id="RadioButton" super="ToggleButtonBase" package="egret.components"/>
+  <component id="RadioButtonGroup" super="EventDispatcher" package="egret.components"/>
+  <component id="Range" super="SkinnableComponent" package="egret.components"/>
+  <component id="Rect" super="UIComponent" package="egret.components"/>
+  <component id="Rectangle" super="Object" package="flash.geom"/>
+  <component id="Scroller" super="UIComponent" default="viewport" package="egret.components"/>
+  <component id="Skin" super="EventDispatcher" default="elementsContent" package="egret.components"/>
+  <component id="SkinnableComponent" super="UIAsset" state="normal,disabled" package="egret.components"/>
+  <component id="SkinnableContainer" super="SkinnableComponent" default="elementsContent" package="egret.components"/>
+  <component id="SkinnableDataContainer" super="SkinnableComponent" default="dataProvider" package="egret.components"/>
+  <component id="SliderBase" super="TrackBase" package="egret.components.supportClasses"/>
+  <component id="Spacer" super="UIComponent" package="egret.components"/>
+  <component id="State" super="EventDispatcher" default="overrides" package="egret.states"/>
+  <component id="TabBar" super="ListBase" package="egret.components"/>
+  <component id="TabBarButton" super="ToggleButtonBase" package="egret.components"/>
+  <component id="TextBase" super="UIComponent" package="egret.components.supportClasses"/>
+  <component id="TileLayout" super="LayoutBase" package="egret.layouts"/>
+  <component id="TitleWindow" super="Panel" package="egret.components"/>
+  <component id="ToggleButton" super="ToggleButtonBase" package="egret.components"/>
+  <component id="ToggleButtonBase" super="ButtonBase" state="up,over,down,disabled,upAndSelected,overAndSelected,downAndSelected,disabledAndSelected" package="egret.components.supportClasses"/>
+  <component id="TrackBase" super="Range" package="egret.components.supportClasses"/>
+  <component id="Tree" super="List" package="egret.components"/>
+  <component id="TreeItemRenderer" super="ItemRenderer" package="egret.components.supportClasses"/>
+  <component id="UIAsset" super="UIComponent" package="egret.components"/>
+  <component id="UIComponent" super="DisplayObjectContainer" package="egret.core"/>
+  <component id="VSlider" super="SliderBase" package="egret.components"/>
+  <component id="VerticalLayout" super="LayoutBase" package="egret.layouts"/>
+  <component id="ViewStack" super="Group" package="egret.components"/>
+</componentPackage>
