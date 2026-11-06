@@ -1,0 +1,18 @@
+{
+    "name": "native",
+    "dependence": ["core"],
+    "output":"core/egret/context",
+    "source":"src/egret/context",
+    "file_list": [
+        "devices/NativeDeviceContext.ts",
+        "renderer/NativeRendererContext.ts",
+        "interactive/NativeTouchContext.ts",
+        "net/NativeNetContext.ts",
+        "net/IVersionController.ts",
+        "NativeContext.d.ts",
+        "display/NativeStageText.ts",
+        "net/VersionController.ts",
+        "net/NativeResourceLoader.ts",
+        "audio/NativeAudio.ts"
+    ]
+}
